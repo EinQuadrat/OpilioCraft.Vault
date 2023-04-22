@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Compile Include="MetadataTests.fs" />
-    <Compile Include="DigitalArchivInitTests.fs" />
+    <Compile Include="VaultTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

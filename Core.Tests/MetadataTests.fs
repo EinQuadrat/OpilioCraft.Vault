@@ -1,8 +1,8 @@
-namespace OpilioCraft.DigitalArchive.Tests
+namespace OpilioCraft.Vault.Tests
 
 open Xunit
 
 open OpilioCraft.FSharp.Prelude
-open OpilioCraft.DigitalArchive.Core
+open OpilioCraft.Vault.Core
 
 // metadata tests
