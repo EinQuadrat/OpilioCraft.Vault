@@ -2,7 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+
+    <PackageId>OpilioCraft.Vault.Core.Cmdlets</PackageId>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Authors>Carsten Schäfer</Authors>
+    <Description>PowerShell cmdlets to work with OpilioCraft.Vault.</Description>
+    <Copyright>Copyright (c) 2023 by Carsten Schäfer</Copyright>
+    <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
+    <PackageTags>OpilioCraft;FSharp</PackageTags>
+
+    <AssemblyName>OpilioCraft.Vault.Core.Cmdlets</AssemblyName>
+    <RootNamespace>OpilioCraft.Vault.Core.Cmdlets</RootNamespace>
+
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DebugType>portable</DebugType>
+    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
