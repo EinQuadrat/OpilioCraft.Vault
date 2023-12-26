@@ -8,7 +8,7 @@ open OpilioCraft.Vault.Core
 [<Cmdlet(VerbsCommon.Get, "ItemMetadata")>]
 [<OutputType(typeof<VaultItem>)>]
 type public GetItemDataCommand () =
-    inherit VaultItemCommandBase ()
+    inherit VaultItemCommand ()
 
     // cmdlet funtionality
     override x.ProcessPath path =

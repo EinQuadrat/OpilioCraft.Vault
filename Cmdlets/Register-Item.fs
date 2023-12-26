@@ -6,7 +6,7 @@ open OpilioCraft.Vault.Core
 [<Cmdlet(VerbsLifecycle.Register, "Item")>]
 [<OutputType(typeof<System.Void>)>]
 type public RegisterItemCommand () =
-    inherit VaultItemCommandBase ()
+    inherit VaultItemCommand ()
 
     override x.ProcessPath path =
         x.VaultHandler |> VaultOperations.addToVault path

@@ -1,9 +1,9 @@
-name: publish
+name: Build and Publish
 
 on: [push, workflow_dispatch]
 
 env:
-  DOTNET_VERSION: '7.x'
+  DOTNET_VERSION: '8.x'
   
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Setup .NET Core
+    - name: Setup .NET Core ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -28,5 +28,5 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release --no-restore
 
-    - name: Publish Package
-      run: dotnet nuget push **/*.nupkg -k ${{ secrets.GPR_TOKEN }} -s GitHub --skip-duplicate
+    - name: Publish
+      run: dotnet nuget push **/*.nupkg -s 'https://nuget.pkg.github.com/EinQuadrat/index.json' -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate

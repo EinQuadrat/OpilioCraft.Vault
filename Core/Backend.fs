@@ -18,7 +18,6 @@ type VaultBackend (root : string, layout : VaultLayout) =
     
     let filesSection = processPath layout.Files
     let constructFilePath itemId ext = filesSection >+> $"{itemId}{ext}"
-    let constructFilePathFromItem (item : VaultItem) = (item.Id, item.ContentType.FileExtension) ||> constructFilePath
     
     let itemIdFromFilename (filename : string) = filename.Substring(0, filename.Length - ".json".Length)
 
@@ -28,7 +27,6 @@ type VaultBackend (root : string, layout : VaultLayout) =
             jsonOpts.WriteIndented <- true
             jsonOpts.Converters.Add(JsonStringEnumConverter(JsonNamingPolicy.CamelCase))
             jsonOpts.Converters.Add(RelationListConverter())
-            jsonOpts.Converters.Add(DetailsConverter())
             jsonOpts
     
     // archive access
@@ -60,7 +58,7 @@ type VaultBackend (root : string, layout : VaultLayout) =
 
     member _.ImportFile itemId sourcePath =
         let fileInfo = FileInfo(sourcePath)
-        let dataFile = (itemId, fileInfo.Extension) ||> constructFilePath
+        let dataFile = (itemId, fileInfo.Extension.ToLower()) ||> constructFilePath
 
         try
             File.Copy(fileInfo.FullName, dataFile, true) // overwrite any existing file to ensure consistent data
@@ -87,47 +85,6 @@ type VaultBackend (root : string, layout : VaultLayout) =
 
 // ------------------------------------------------------------------------------------------------
 // serialization handling
-
-and DetailsConverter() =
-    inherit JsonConverter<ItemDetail>()
-
-    [<Literal>] static let DateTimePrefix = "#DateTime#"
-    [<Literal>] static let DateTimeOffset = 11 // length of prefix + 1 for trailing whitespace
-    [<Literal>] static let TimeSpanPrefix = "#TimeSpan#"
-    [<Literal>] static let TimeSpanOffset = 11
-    [<Literal>] static let FloatPrefix    = "#Float#"
-    [<Literal>] static let FloatOffset    = 8
-
-    override _.Read (reader: byref<Utf8JsonReader>, _: Type, _: JsonSerializerOptions) =
-        match reader.TokenType with
-        | JsonTokenType.False
-        | JsonTokenType.True -> reader.GetBoolean() |> ItemDetail.Boolean
-
-        | JsonTokenType.Number -> reader.GetDecimal() |> ItemDetail.Number
-
-        | JsonTokenType.String ->
-            // smart string handling
-            reader.GetString()
-            |> function
-                | s when s.StartsWith(DateTimePrefix) -> s.Substring(DateTimeOffset) |> DateTime.Parse |> ItemDetail.DateTime
-                | s when s.StartsWith(TimeSpanPrefix) -> s.Substring(TimeSpanOffset) |> TimeSpan.Parse |> ItemDetail.TimeSpan
-                | s when s.StartsWith(FloatPrefix) -> s.Substring(FloatOffset) |> Double.Parse |> ItemDetail.Float
-                | s -> s |> ItemDetail.String
-
-        | _ -> failwith $"[{nameof VaultBackend}] unexpected data type while deserializing"
-    
-    override _.Write (writer: Utf8JsonWriter, value: ItemDetail, options: JsonSerializerOptions) =
-        let dateTimeFormat = @"yyyy-MM-ddTHH\:mm\:sszzz"
-        
-        match value with
-        | Boolean x -> writer.WriteBooleanValue x
-        | Number x -> writer.WriteNumberValue x
-        | String x -> writer.WriteStringValue x
-
-        // not natively supported value types
-        | DateTime x -> writer.WriteStringValue $"{DateTimePrefix} {x.ToString(dateTimeFormat)}"
-        | Float x -> writer.WriteStringValue $"{FloatPrefix} {x.ToString()}" // preserve precision of number value by string wrapper
-        | TimeSpan x -> writer.WriteStringValue $"{TimeSpanPrefix} {x.ToString()}"
         
 and RelationListConverter() =
     inherit JsonConverter<Relation list>()

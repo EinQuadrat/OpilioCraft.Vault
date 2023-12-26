@@ -4,6 +4,8 @@ open System
 open System.Management.Automation
 
 open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp.PowerShell
+open OpilioCraft.FSharp.PowerShell.CmdletExtension
 open OpilioCraft.Vault.Core
 
 type private VaultHandlerStatus =
@@ -11,8 +13,8 @@ type private VaultHandlerStatus =
     | Handler of VaultHandler
 
 [<AbstractClass>]
-type public VaultItemCommandBase () =
-    inherit PathSupportingCommandBase ()
+type public VaultItemCommand () =
+    inherit PathSupportingCommand ()
 
     // vault handler
     let mutable vaultHandler = NotInitialized

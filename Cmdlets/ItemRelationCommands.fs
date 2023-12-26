@@ -22,7 +22,7 @@ module private RelationHelper =
 [<Cmdlet(VerbsCommon.Get, "Relation")>]
 [<OutputType(typeof<Relation list>)>]
 type public GetRelationCommand () =
-    inherit VaultItemCommandBase ()
+    inherit VaultItemCommand ()
 
     // cmdlet behaviour
     override x.ProcessPath path =
@@ -40,7 +40,7 @@ type private RelationContext =
         RelationType : RelationTypeParam
     }
 
-    static member Init (x : VaultItemCommandBase) (target : string) (relType : string) =
+    static member Init (x : VaultItemCommand) (target : string) (relType : string) =
         let targetId = x.GetIdOfManagedItem <| x.GetUnresolvedProviderPathFromPSPath target
 
         let relTypeValue : RelationTypeParam =
@@ -62,7 +62,7 @@ and RelationTypeParam =
 [<Cmdlet(VerbsCommon.Set, "Relation")>]
 [<OutputType(typeof<Void>)>]
 type public SetRelationCommand () =
-    inherit VaultItemCommandBase ()
+    inherit VaultItemCommand ()
 
     // processed params
     let mutable context = RelationContext.Default
@@ -95,7 +95,7 @@ type public SetRelationCommand () =
 [<Cmdlet(VerbsCommon.Remove, "Relation")>]
 [<OutputType(typeof<Void>)>]
 type public RemoveRelationCommand () =
-    inherit VaultItemCommandBase ()
+    inherit VaultItemCommand ()
 
     // processed params
     let mutable context = RelationContext.Default
