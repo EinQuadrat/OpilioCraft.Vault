@@ -14,16 +14,19 @@ module VaultManager =
 
     // archive access
     let private initVaultHandler name : VaultHandler =
-        let registedVaults = UserSettings.vaultRegistry () in
+        try
+            let registeredVaults = UserSettings.vaultRegistry () in
 
-        let pathToVault =
-            if registedVaults.ContainsKey name
-            then
-                registedVaults.[name]
-            else
-                raise <| UnknownVaultException name
+            let pathToVault =
+                if registeredVaults.ContainsKey name
+                then
+                    registeredVaults.[name]
+                else
+                    raise <| UnknownVaultException name
 
-        VaultHandler.Init pathToVault
+            VaultHandler.Init pathToVault
+        with
+            | exn -> failwith $"[VaultManager] cannot initialize vault handler: {exn.Message}"
 
     let getHandler name =
         if (not <| Map.containsKey name activeVaults)
