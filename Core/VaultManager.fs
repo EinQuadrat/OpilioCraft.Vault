@@ -1,4 +1,4 @@
-﻿namespace OpilioCraft.Vault.Core
+﻿namespace OpilioCraft.Vault
 
 open OpilioCraft.FSharp.Prelude
 

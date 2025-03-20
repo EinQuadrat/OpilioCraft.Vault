@@ -1,23 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 
-    <PackageId>OpilioCraft.Vault.Cmdlets</PackageId>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <Authors>Carsten Schäfer</Authors>
     <Description>PowerShell cmdlets to work with OpilioCraft.Vault.</Description>
-    <Copyright>Copyright (c) 2023 by Carsten Schäfer</Copyright>
-    <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
-    <PackageTags>OpilioCraft;FSharp</PackageTags>
 
-    <AssemblyName>OpilioCraft.Vault.Cmdlets</AssemblyName>
-    <RootNamespace>OpilioCraft.Vault.Cmdlets</RootNamespace>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DebugType>portable</DebugType>
-    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="1.0.0" />
+    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

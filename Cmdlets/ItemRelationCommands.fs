@@ -3,8 +3,7 @@
 open System
 open System.Management.Automation
 
-open OpilioCraft.FSharp.Prelude
-open OpilioCraft.Vault.Core
+open OpilioCraft.Vault
 
 module private RelationHelper =
     let tryParseRelationType (input : string) : RelationType option =

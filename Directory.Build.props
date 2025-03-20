@@ -1,0 +1,29 @@
+﻿<Project>
+
+  <PropertyGroup Label="UserMacros">
+    <SolutionPrefix>OpilioCraft.Vault</SolutionPrefix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <Authors>Carsten Schäfer</Authors>
+    <Copyright>Copyright (c) 2022-2025 by Carsten Schäfer</Copyright>
+
+    <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
+    <PackageTags>OpilioCraft;FSharp</PackageTags>
+
+    <AssemblyName>$(SolutionPrefix).$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(SolutionPrefix).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+
+    <DebugType>None</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
+    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
+
+  </PropertyGroup>
+
+</Project>

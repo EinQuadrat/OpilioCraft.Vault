@@ -1,4 +1,4 @@
-﻿module OpilioCraft.Vault.Core.VaultOperations
+﻿module OpilioCraft.Vault.VaultOperations
 
 open System.IO
 open OpilioCraft.FSharp.Prelude
