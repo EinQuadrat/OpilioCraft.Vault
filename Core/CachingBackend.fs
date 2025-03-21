@@ -8,13 +8,13 @@ type CachingVaultBackend (root : string, layout : VaultLayout) =
     let cache = new Dictionary<ItemId,VaultItem>()
 
     // public API
-    member _.ContainsItem itemId = cache.ContainsKey itemId || base.ContainsItem itemId
+    override _.ContainsItem itemId = cache.ContainsKey itemId || base.ContainsItem itemId
 
-    member _.FetchItem itemId =
+    override _.FetchItem itemId =
         if not <| cache.ContainsKey itemId then cache.[itemId] <- base.FetchItem itemId // populate cache on demand
         cache.[itemId]
 
-    member _.StoreItem item =
+    override _.StoreItem item =
         let itemId = item.Id // very defensive style: be prepared for item corruption on saving it to disc
 
         try
@@ -23,7 +23,7 @@ type CachingVaultBackend (root : string, layout : VaultLayout) =
         with
             | _ -> itemId |> cache.Remove |> ignore; reraise() // in case of errors remove item from cache
     
-    member _.ForgetItem itemId =
+    override _.ForgetItem itemId =
         try
             base.ForgetItem itemId
         finally

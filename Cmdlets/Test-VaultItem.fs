@@ -2,13 +2,16 @@
 
 open System.Management.Automation
 
-[<Cmdlet(VerbsCommon.Get, "ItemStatus")>]
+open OpilioCraft.FSharp.Prelude
+
+[<Cmdlet(VerbsDiagnostic.Test, "VaultItem")>]
 [<OutputType(typeof<bool>)>]
-type public GetItemStatusCommand () =
+type public TestVaultItemCommand () =
     inherit VaultItemCommand ()
 
     // cmdlet funtionality
     override x.ProcessPath path =
         path
-        |> x.VaultHandler.Contains
+        |> Fingerprint.fingerprintAsString
+        |> x.ActiveVault.Contains
         |> x.WriteObject

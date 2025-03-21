@@ -14,5 +14,5 @@ type public GetItemDataCommand () =
     override x.ProcessPath path =
         path
         |> Fingerprint.fingerprintAsString
-        |> x.VaultHandler.Fetch
+        |> x.ActiveVault.Fetch
         |> x.WriteObject

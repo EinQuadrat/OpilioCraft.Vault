@@ -4,12 +4,12 @@ open System.IO
 open OpilioCraft.FSharp.Prelude
 
 // common operations
-let addToVault path (vaultHandler : VaultHandler) =
+let addToVault path (vault : Vault) =
     try
         let fileInfo = FileInfo path
         let fingerprint = fileInfo.FullName |> Fingerprint.fingerprintAsString
 
-        if not <| vaultHandler.Contains fingerprint
+        if not <| vault.Contains fingerprint
         then
             // create metadata
             let vaultItem =
@@ -20,24 +20,24 @@ let addToVault path (vaultHandler : VaultHandler) =
                 }
 
             // store it
-            vaultHandler.ImportFile fingerprint path
-            vaultHandler.Store vaultItem
+            vault.ImportFile fingerprint path
+            vault.Store vaultItem
 
     with
         | exn -> failwith $"[OpilioCraft.Vault] cannot add file to vault: {exn.Message}"
 
-let updateVaultItem itemId (updateFunc : VaultItem -> VaultItem) (vaultHandler : VaultHandler) =
+let updateVaultItem itemId (updateFunc : VaultItem -> VaultItem) (vault : Vault) =
     try
-        vaultHandler.Fetch itemId
+        vault.Fetch itemId
         |> updateFunc
-        |> vaultHandler.Store
+        |> vault.Store
 
     with
         | exn -> failwith $"[OpilioCraft.Vault] cannot update item with id {itemId}: {exn.Message}"
 
-let removeFromVault itemId (vaultHandler : VaultHandler) =
+let removeFromVault itemId (vault : Vault) =
     try
-        vaultHandler.Forget itemId
+        vault.Forget itemId
 
     with
         | exn -> failwith $"[OpilioCraft.Vault] cannot forget item with id {itemId}: {exn.Message}"
@@ -57,7 +57,7 @@ module Relations =
         | _ -> item
 
     let remove rel item =
-        { item with Relations = item.Relations |> List.filter ( fun r -> r <> rel ) }
+        { item with Relations = item.Relations |> List.filter (fun r -> r <> rel) }
 
     let removeRelationsTo targetId item =
         { item with Relations = item.Relations |> List.filter (fun rel -> rel.Target <> targetId) }

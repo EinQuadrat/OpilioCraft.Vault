@@ -9,6 +9,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Core.Tests", "Core.Tests\Co
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Cmdlets", "Cmdlets\Cmdlets.fsproj", "{5ED05E35-F098-4E19-BA56-1F9F7B024042}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projektmappenelemente", "Projektmappenelemente", "{D1AB40AC-F049-4216-816E-D702E64B5099}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

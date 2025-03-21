@@ -6,27 +6,27 @@ open System.IO
 open OpilioCraft.FSharp.Prelude
 
 // ----------------------------------------------------------------------------
-// features supported by VaultHandler
+// features supported by Vault
 
 type private VaultCommand =
-    | Contains of itemId:ItemId * AsyncReplyChannel<bool>
+    | Contains      of itemId:ItemId * AsyncReplyChannel<bool>
 
-    | Fetch  of itemId:ItemId * AsyncReplyChannel<VaultItem>
-    | Store  of item:VaultItem
-    | Forget of itemId:ItemId // any request for non-existing item is gracefully ignored
+    | Fetch         of itemId:ItemId * AsyncReplyChannel<VaultItem>
+    | Store         of item:VaultItem
+    | Forget        of itemId:ItemId // any request for non-existing item is gracefully ignored
 
-    | ImportFile of itemId:ItemId * sourcePath:string
-    | ExportFile of itemId:ItemId * targetPath:string * overwrite:bool
+    | ImportFile    of itemId:ItemId * sourcePath:string
+    | ExportFile    of itemId:ItemId * targetPath:string * overwrite:bool
 
     | List of AsyncReplyChannel<ItemId list>
 
     | Quit
 
 // ----------------------------------------------------------------------------
-// vault handler itself
+// vault itself
 
 [<Sealed>]
-type VaultHandler private (backend : VaultBackend) =
+type Vault private (backend : VaultBackend) =
     static let ImplementationVersion = Version(1, 0)
     static let SettingsFilename = "settings.json"
 
@@ -70,7 +70,7 @@ type VaultHandler private (backend : VaultBackend) =
     member _.Forget itemId = vaultAgent.Force().Post(Forget(itemId))
     member _.ImportFile itemId sourcePath = vaultAgent.Force().Post(ImportFile(itemId, sourcePath))
     member _.ExportFile itemId targetPath overwrite = vaultAgent.Force().Post(ExportFile(itemId, targetPath, overwrite))
-    member _.List () = vaultAgent.Force().PostAndReply(fun reply -> List(reply))
+    member _.List() = vaultAgent.Force().PostAndReply(fun reply -> List(reply))
 
     // instance creation
     static member VerifyVaultSetup pathToVault =
@@ -94,21 +94,21 @@ type VaultHandler private (backend : VaultBackend) =
         // returns parameters for VaultHandler constructor
         (pathToVault, vaultConfig.Layout)
 
-    static member Init(pathToVault, ?enableCaching) =
-        let vaultHandlerArgs = VaultHandler.VerifyVaultSetup pathToVault in
+    static member Attach(pathToVault, ?enableCaching) =
+        let vaultConfig = Vault.VerifyVaultSetup pathToVault in
 
         let backend =
             match enableCaching with
-            | Some true -> vaultHandlerArgs |> CachingVaultBackend :> VaultBackend
-            | _ -> vaultHandlerArgs |> VaultBackend
+            | Some true -> vaultConfig |> CachingVaultBackend :> VaultBackend
+            | _ -> vaultConfig |> VaultBackend
 
-        new VaultHandler(backend)
+        new Vault(backend)
 
     // implements IDisposable
     member private x.Disposer = lazy ( vaultAgent.Value.Post(Quit) )
 
     member x.DisposeHandler disposing =
-        if (disposing && (not x.Disposer.IsValueCreated))
+        if disposing && (not x.Disposer.IsValueCreated)
         then
             x.Disposer.Force ()
 

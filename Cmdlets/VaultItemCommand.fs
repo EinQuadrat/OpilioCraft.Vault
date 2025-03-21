@@ -8,27 +8,27 @@ open OpilioCraft.FSharp.PowerShell
 open OpilioCraft.FSharp.PowerShell.CmdletExtension
 open OpilioCraft.Vault.Core
 
-type private VaultHandlerStatus =
+type private VaultStatus =
     | NotInitialized
-    | Handler of VaultHandler
+    | Initialized of Vault
 
 [<AbstractClass>]
 type public VaultItemCommand () =
     inherit PathSupportingCommand ()
 
-    // vault handler
-    let mutable vaultHandler = NotInitialized
+    // vault
+    let mutable vault = NotInitialized
 
-    member _.VaultHandler =
-        match vaultHandler with
+    member _.ActiveVault =
+        match vault with
         | NotInitialized -> failwith "[FATAL] connection to vault is not initialized yet"
-        | Handler vaultHandler -> vaultHandler
+        | Initialized vault -> vault
 
     // vault item
     member x.GetIdOfManagedItem path =
         let itemId = Fingerprint.fingerprintAsString path
 
-        if not <| x.VaultHandler.Contains itemId
+        if not <| x.ActiveVault.Contains(itemId)
         then
             failwith $"not known to vault: {path}"
         else
@@ -44,7 +44,7 @@ type public VaultItemCommand () =
         base.BeginProcessing ()
 
         try
-            vaultHandler <- Handler <| VaultManager.getHandler x.Vault
+            vault <- Initialized <| VaultManager.getVault x.Vault
         with
             | exn -> exn |> x.ThrowAsTerminatingError ErrorCategory.ResourceUnavailable 
 

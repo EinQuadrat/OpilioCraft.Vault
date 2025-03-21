@@ -11,12 +11,12 @@ type VaultBackend (root : string, layout : VaultLayout) =
     // content store filesystem layout
     let (>+>) path childPath = Path.Combine(path, childPath)
 
-    let processPath (path : string) = if Path.IsPathRooted(path) then path else root >+> path
+    let resolvePath (path : string) = if Path.IsPathRooted(path) then path else root >+> path
 
-    let metadataSection = processPath layout.Metadata
+    let metadataSection = resolvePath layout.Metadata
     let constructMetadataPath (id : ItemId) = metadataSection >+> $"{id}.json"
     
-    let filesSection = processPath layout.Files
+    let filesSection = resolvePath layout.Files
     let constructFilePath itemId ext = filesSection >+> $"{itemId}{ext}"
     
     let itemIdFromFilename (filename : string) = filename.Substring(0, filename.Length - ".json".Length)
@@ -29,25 +29,31 @@ type VaultBackend (root : string, layout : VaultLayout) =
             jsonOpts.Converters.Add(RelationListConverter())
             jsonOpts
     
-    // archive access
-    member _.ContainsItem itemId =
+    // item access API
+    abstract member ContainsItem : ItemId -> bool
+    abstract member FetchItem : ItemId -> VaultItem
+    abstract member StoreItem : VaultItem -> unit
+    abstract member ForgetItem : ItemId -> unit
+
+    // item access implementation
+    default _.ContainsItem itemId =
         itemId |> constructMetadataPath |> File.Exists
 
-    member _.FetchItem itemId =
+    default _.FetchItem itemId =
         try
             let json = itemId |> constructMetadataPath |> File.ReadAllText in
             JsonSerializer.Deserialize<VaultItem>(json, jsonOptions)
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot read metadata for id {itemId}: {exn.Message}"
 
-    member _.StoreItem item =
+    default _.StoreItem item =
         try
             IO.saveGuard (item.Id |> constructMetadataPath)
             <| fun uri -> let itemAsJson = JsonSerializer.Serialize(item, jsonOptions) in File.WriteAllText(uri, itemAsJson)
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot write metadata for id {item.Id}: {exn.Message}"
 
-    member _.ForgetItem itemId =
+    default _.ForgetItem itemId =
         try
             // be relaxed on non-existing itemId
             let pathToMedatataFile = itemId |> constructMetadataPath in
@@ -56,6 +62,7 @@ type VaultBackend (root : string, layout : VaultLayout) =
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot cleanup resources related to id {itemId}: {exn.Message}"
 
+    // content API
     member _.ImportFile itemId sourcePath =
         let fileInfo = FileInfo(sourcePath)
         let dataFile = (itemId, fileInfo.Extension.ToLower()) ||> constructFilePath
@@ -77,10 +84,10 @@ type VaultBackend (root : string, layout : VaultLayout) =
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot export file for id {id}: {exn.Message}"
 
-    member _.List () =
+    member _.List() =
         metadataSection
         |> Directory.EnumerateFiles
-        |> Seq.map (fun filename -> filename |> FileInfo |> (fun fi -> fi.Name |> itemIdFromFilename))
+        |> Seq.map (fun filename -> filename |> FileInfo |> _.Name |> itemIdFromFilename)
         |> Seq.toList
 
 // ------------------------------------------------------------------------------------------------
@@ -89,9 +96,9 @@ type VaultBackend (root : string, layout : VaultLayout) =
 and RelationListConverter() =
     inherit JsonConverter<Relation list>()
 
-    override _.Read (reader: byref<Utf8JsonReader>, _: Type, options: JsonSerializerOptions) =
+    override _.Read(reader: byref<Utf8JsonReader>, _: Type, options: JsonSerializerOptions) =
         JsonSerializer.Deserialize<Relation seq>(&reader, options)
         |> List.ofSeq
     
-    override _.Write (writer: Utf8JsonWriter, value: Relation list, options: JsonSerializerOptions) =
+    override _.Write(writer: Utf8JsonWriter, value: Relation list, options: JsonSerializerOptions) =
         JsonSerializer.Serialize(writer, List.toSeq value, options)

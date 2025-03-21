@@ -19,24 +19,15 @@ exception MissingVaultSettingsFileException of Path:string
 
 type VaultConfig =
     {
-        Version     : Version
-        Layout      : VaultLayout
+        Version : Version
+        Layout : VaultLayout
     }
-    
-    interface IJsonOnDeserialized with
-        member x.OnDeserialized () =
-            isNotNull x.Layout -||- ArgumentNullException("VaultConfig.Layout")
 
 and VaultLayout =
     {
         Metadata : string
-        Files    : string
+        Files : string
     }
-
-    interface IJsonOnDeserialized with
-        member x.OnDeserialized () =
-            isNotNull x.Metadata -||- ArgumentNullException("VaultConfig.VaultLayout.Metdata")
-            isNotNull x.Files -||- ArgumentNullException("VaultConfig.VaultLayout.Files")
 
 // ----------------------------------------------------------------------------
 
@@ -44,9 +35,9 @@ type ItemId = Fingerprint
 
 type VaultItem = // data structure used by the vault
     {
-        Id          : ItemId // use fingerprint (SHA256) as id
-        AsOf        : DateTime // as UTC timestamp
-        Relations   : Relation list
+        Id : ItemId // use fingerprint (SHA256) as id
+        AsOf : DateTime // as UTC timestamp
+        Relations : Relation list
     }
 
     [<JsonIgnore>]
@@ -54,7 +45,7 @@ type VaultItem = // data structure used by the vault
 
 and Relation = {
     Target : ItemId
-    IsA    : RelationType
+    IsA : RelationType
 }
 
 and RelationType =

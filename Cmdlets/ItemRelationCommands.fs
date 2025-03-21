@@ -3,7 +3,6 @@
 open System
 open System.Management.Automation
 
-open OpilioCraft.FSharp.Prelude
 open OpilioCraft.Vault.Core
 
 module private RelationHelper =
@@ -27,7 +26,7 @@ type public GetRelationCommand () =
     // cmdlet behaviour
     override x.ProcessPath path =
         x.GetIdOfManagedItem path // throws exception on unmanaged item
-        |> x.VaultHandler.Fetch
+        |> x.ActiveVault.Fetch
         |> fun metadata -> metadata.Relations
         |> x.WriteObject
 
@@ -40,7 +39,7 @@ type private RelationContext =
         RelationType : RelationTypeParam
     }
 
-    static member Init (x : VaultItemCommand) (target : string) (relType : string) =
+    static member Init(x : VaultItemCommand, target : string, relType : string) =
         let targetId = x.GetIdOfManagedItem <| x.GetUnresolvedProviderPathFromPSPath target
 
         let relTypeValue : RelationTypeParam =
@@ -50,12 +49,11 @@ type private RelationContext =
 
         { Target = targetId; RelationType = relTypeValue }
 
-    static member Default = { Target = String.Empty; RelationType = RelationTypeParam.NotSpecified }
+    static member Default = { Target = String.Empty; RelationType = NotSpecified }
 
 and RelationTypeParam =
     | NotSpecified
     | Value of RelationType
-
 
 // ------------------------------------------------------------------------------------------------
 
@@ -79,16 +77,15 @@ type public SetRelationCommand () =
     // cmdlet behaviour
     override x.BeginProcessing() =
         base.BeginProcessing()
-        context <- RelationContext.Init x x.Target x.RelationType
+        context <- RelationContext.Init(x, x.Target, x.RelationType)
     
     override x.ProcessPath path =
         let itemId = x.GetIdOfManagedItem path
         let relType = match context.RelationType with | Value relType -> relType | _ -> RelationType.Related
 
-        x.VaultHandler |> VaultOperations.updateVaultItem
+        x.ActiveVault |> VaultOperations.updateVaultItem
             itemId
             (VaultOperations.Relations.add { Target = context.Target; IsA = relType })
-
 
 // ------------------------------------------------------------------------------------------------
 
@@ -121,18 +118,18 @@ type public RemoveRelationCommand () =
 
         if not <| x.All.IsPresent
         then
-            context <- RelationContext.Init x x.Target x.RelationType
+            context <- RelationContext.Init(x, x.Target, x.RelationType)
 
     override x.ProcessPath path =
         let itemId = x.GetIdOfManagedItem path
 
         if x.All.IsPresent
         then
-            x.VaultHandler |> VaultOperations.updateVaultItem itemId VaultOperations.Relations.removeAll
+            x.ActiveVault |> VaultOperations.updateVaultItem itemId VaultOperations.Relations.removeAll
         else
             let updateAction =
                 match context.RelationType with
                 | Value relType -> VaultOperations.Relations.remove { Target = context.Target; IsA = relType }
                 | NotSpecified -> VaultOperations.Relations.removeRelationsTo context.Target
 
-            x.VaultHandler |> VaultOperations.updateVaultItem itemId updateAction
+            x.ActiveVault |> VaultOperations.updateVaultItem itemId updateAction
