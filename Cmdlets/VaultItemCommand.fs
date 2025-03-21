@@ -6,7 +6,7 @@ open System.Management.Automation
 open OpilioCraft.FSharp.Prelude
 open OpilioCraft.FSharp.PowerShell
 open OpilioCraft.FSharp.PowerShell.CmdletExtension
-open OpilioCraft.Vault.Core
+open OpilioCraft.Vault
 
 type private VaultStatus =
     | NotInitialized

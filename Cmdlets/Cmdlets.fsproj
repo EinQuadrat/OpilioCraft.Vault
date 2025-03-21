@@ -1,18 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 
     <Description>PowerShell cmdlets to work with OpilioCraft.Vault.</Description>
 
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DebugType>portable</DebugType>
-    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
-    <EnableNETAnalyzers>True</EnableNETAnalyzers>
-    <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <IsPublishable>True</IsPublishable>
-    <FSharpPreferNetFrameworkTools>False</FSharpPreferNetFrameworkTools>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="1.0.1" />
+    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,9 +1,9 @@
-﻿namespace OpilioCraft.Vault.Core
+﻿namespace OpilioCraft.Vault
 
 open System
 open System.IO
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp.Json
 
 // ----------------------------------------------------------------------------
 // features supported by Vault
@@ -89,7 +89,8 @@ type Vault private (backend : VaultBackend) =
         // load vault configuration
         let vaultConfig : VaultConfig =
             UserSettings.load<VaultConfig> pathToSettingsFile
-            |> Verify.isVersion ImplementationVersion
+            |> Result.bind (UserSettings.Version.isValidVersion ImplementationVersion)
+            |> Result.defaultWith UserSettings.throwExceptionOnError
         
         // returns parameters for VaultHandler constructor
         (pathToVault, vaultConfig.Layout)

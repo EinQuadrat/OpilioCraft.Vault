@@ -3,8 +3,8 @@ namespace OpilioCraft.Vault.Tests
 open System.IO
 open Xunit
 
-open OpilioCraft.FSharp.Prelude
-open OpilioCraft.Vault.Core
+open OpilioCraft.FSharp.Json.UserSettings
+open OpilioCraft.Vault
 
 // digital archive structure at filesystem
 type DigitalArchiveInitTests () =

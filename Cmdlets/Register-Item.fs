@@ -2,8 +2,7 @@
 
 open System.IO
 open System.Management.Automation
-
-open OpilioCraft.Vault.Core
+open OpilioCraft.Vault
 
 [<Cmdlet(VerbsLifecycle.Register, "Item")>]
 [<OutputType(typeof<System.Void>)>]

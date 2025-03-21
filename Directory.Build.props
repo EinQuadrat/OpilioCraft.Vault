@@ -1,21 +1,32 @@
 ﻿<Project>
 
-    <PropertyGroup Label="UserMacros">
-      <SolutionPrefix>OpilioCraft.Vault</SolutionPrefix>
-    </PropertyGroup>
+  <PropertyGroup Label="UserMacros">
+    <SolutionPrefix>OpilioCraft.Vault</SolutionPrefix>
+  </PropertyGroup>
 
-    <PropertyGroup>
+  <PropertyGroup>
 
+    <Authors>Carsten Schäfer</Authors>
+    <Copyright>Copyright (c) 2022-2025 by Carsten Schäfer</Copyright>
       <VersionPrefix>1.0.1</VersionPrefix>
-      
+
       <Authors>Carsten Schäfer</Authors>
       <Copyright>Copyright (c) 2023-2024 by Carsten Schäfer</Copyright>
-      <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
       <PackageTags>OpilioCraft;Vault;FSharp</PackageTags>
 
-      <AssemblyName>$(SolutionPrefix).$(MSBuildProjectName)</AssemblyName>
-      <RootNamespace>$(SolutionPrefix).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>$(SolutionPrefix).$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(SolutionPrefix).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 
-    </PropertyGroup>
+    <DebugType>None</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
+    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
+
+  </PropertyGroup>
 
 </Project>

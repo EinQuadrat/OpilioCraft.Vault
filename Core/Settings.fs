@@ -1,6 +1,10 @@
-﻿namespace OpilioCraft.Vault.Core
+﻿namespace OpilioCraft.Vault
 
 open System
+
+open OpilioCraft.FSharp.Json
+
+// ------------------------------------------------------------------------------------------------
 
 [<RequireQualifiedAccess>]
 module Settings =
@@ -13,3 +17,14 @@ module Settings =
         ]
         |> List.tryFind IO.File.Exists
         |> Option.defaultWith (fun _ -> failwith "[OpilioCraft.Vault] registry file not found")
+
+
+// ------------------------------------------------------------------------------------------------
+
+[<RequireQualifiedAccess>]
+module UserSettings =
+    let load () = UserSettings.load<VaultRegistry> Settings.VaultRegistryPath
+
+    // load user settings on demand
+    let private guardedLoad = lazy ( load () |> Result.defaultWith UserSettings.throwExceptionOnError )
+    let vaultRegistry () = guardedLoad.Value
