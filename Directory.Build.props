@@ -6,14 +6,13 @@
 
   <PropertyGroup>
 
+    <VersionPrefix>1.1.0</VersionPrefix>
+
     <Authors>Carsten Schäfer</Authors>
     <Copyright>Copyright (c) 2022-2025 by Carsten Schäfer</Copyright>
-      <VersionPrefix>1.0.1</VersionPrefix>
 
-      <Authors>Carsten Schäfer</Authors>
-      <Copyright>Copyright (c) 2023-2024 by Carsten Schäfer</Copyright>
     <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
-      <PackageTags>OpilioCraft;Vault;FSharp</PackageTags>
+    <PackageTags>OpilioCraft;Vault;FSharp</PackageTags>
 
     <AssemblyName>$(SolutionPrefix).$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(SolutionPrefix).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>

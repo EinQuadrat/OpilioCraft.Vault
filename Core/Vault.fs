@@ -3,20 +3,21 @@
 open System
 open System.IO
 
-open OpilioCraft.FSharp.Json
+open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp.Json.UserSettings
 
 // ----------------------------------------------------------------------------
 // features supported by Vault
 
 type private VaultCommand =
-    | Contains      of itemId:ItemId * AsyncReplyChannel<bool>
+    | Contains      of ItemId:ItemId * AsyncReplyChannel<bool>
 
-    | Fetch         of itemId:ItemId * AsyncReplyChannel<VaultItem>
-    | Store         of item:VaultItem
-    | Forget        of itemId:ItemId // any request for non-existing item is gracefully ignored
+    | Fetch         of ItemId:ItemId * AsyncReplyChannel<VaultItem>
+    | Store         of Item:VaultItem
+    | Forget        of ItemId:ItemId // any request for non-existing item is gracefully ignored
 
-    | ImportFile    of itemId:ItemId * sourcePath:string
-    | ExportFile    of itemId:ItemId * targetPath:string * overwrite:bool
+    | ImportFile    of ItemId:ItemId * SourcePath:string
+    | ExportFile    of ItemId:ItemId * TargetPath:string * Overwrite:bool
 
     | List of AsyncReplyChannel<ItemId list>
 
@@ -24,7 +25,7 @@ type private VaultCommand =
 
 // ----------------------------------------------------------------------------
 // vault itself
-
+    
 [<Sealed>]
 type Vault private (backend : VaultBackend) =
     static let ImplementationVersion = Version(1, 0)
@@ -70,43 +71,48 @@ type Vault private (backend : VaultBackend) =
     member _.Forget itemId = vaultAgent.Force().Post(Forget(itemId))
     member _.ImportFile itemId sourcePath = vaultAgent.Force().Post(ImportFile(itemId, sourcePath))
     member _.ExportFile itemId targetPath overwrite = vaultAgent.Force().Post(ExportFile(itemId, targetPath, overwrite))
-    member _.List() = vaultAgent.Force().PostAndReply(fun reply -> List(reply))
+    member _.List () = vaultAgent.Force().PostAndReply(fun reply -> List(reply))
 
     // instance creation
-    static member VerifyVaultSetup pathToVault =
-        // check given path
-        if not <| Directory.Exists pathToVault
-        then
-            raise <| DirectoryNotFoundException pathToVault
-
-        // check settings file exists
-        let pathToSettingsFile = Path.Combine(pathToVault, SettingsFilename)
-
-        if not <| File.Exists pathToSettingsFile
-        then
-            raise <| MissingVaultSettingsFileException pathToSettingsFile
-
-        // load vault configuration
-        let vaultConfig : VaultConfig =
-            UserSettings.load<VaultConfig> pathToSettingsFile
-            |> Result.bind (UserSettings.Version.isValidVersion ImplementationVersion)
-            |> Result.defaultWith UserSettings.throwExceptionOnError
-        
-        // returns parameters for VaultHandler constructor
-        (pathToVault, vaultConfig.Layout)
-
     static member Attach(pathToVault, ?enableCaching) =
-        let vaultConfig = Vault.VerifyVaultSetup pathToVault in
+        let resolvePath root (path : string) = if Path.IsPathRooted(path) then path else Path.Combine(root, path)
 
-        let backend =
+        // check vault path
+        Ok pathToVault
+        |> Result.testWith Directory.Exists VaultNotFound
+
+        // check settings file
+        |> Result.map (fun p -> Path.Combine(p, SettingsFilename))
+        |> Result.testWith File.Exists MissingVaultSettingsFile
+
+        // check settings
+        |> Result.bind (load<VaultConfig> >> (Result.mapError InvalidVaultSettingsFile))
+        |> Result.bind (Version.isValidVersion ImplementationVersion >> (Result.mapError InvalidVaultSettingsFile))
+
+        // check vault layout
+        |> Result.bind (fun settings ->
+            Ok settings.Layout
+            |> Result.bind (verify (tryGetProperty "Metadata" >> Option.isSome ) (fun _ -> MissingProperty("Metadata")))
+            |> Result.map (fun l -> { l with Metadata = resolvePath pathToVault (l.Metadata) })
+            |> Result.bind (verify (fun s -> Directory.Exists(s.Metadata)) (fun s -> MissingFolder(s.Metadata)))
+            |> Result.bind (verify (tryGetProperty "Files" >> Option.isSome ) (fun _ -> MissingProperty("Files")))
+            |> Result.map (fun l -> { l with Files = resolvePath pathToVault (l.Files) })
+            |> Result.bind (verify (fun s -> Directory.Exists(s.Files)) (fun s -> MissingFolder(s.Files)))
+            |> Result.mapError InvalidVaultSettingsFile
+            )
+        
+        // create backend
+        |> Result.map (fun layout ->
             match enableCaching with
-            | Some true -> vaultConfig |> CachingVaultBackend :> VaultBackend
-            | _ -> vaultConfig |> VaultBackend
+            | Some true -> layout |> CachingVaultBackend :> VaultBackend
+            | _ -> layout |> VaultBackend
+            )
 
-        new Vault(backend)
+        // initialize vault access
+        |> Result.map (fun backend -> new Vault(backend))
 
     // implements IDisposable
-    member private x.Disposer = lazy ( vaultAgent.Value.Post(Quit) )
+    member private _.Disposer = lazy ( vaultAgent.Value.Post(Quit) )
 
     member x.DisposeHandler disposing =
         if disposing && (not x.Disposer.IsValueCreated)
@@ -117,3 +123,4 @@ type Vault private (backend : VaultBackend) =
         member x.Dispose() =
             x.DisposeHandler true
             GC.SuppressFinalize x
+

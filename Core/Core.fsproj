@@ -12,10 +12,10 @@
 
   <ItemGroup>
     <Compile Include="Model.fs" />
-    <Compile Include="Settings.fs" />
     <Compile Include="Backend.fs" />
     <Compile Include="CachingBackend.fs" />
     <Compile Include="Vault.fs" />
+    <Compile Include="VaultRegistry.fs" />
     <Compile Include="VaultManager.fs" />
     <Compile Include="VaultOperations.fs" />
   </ItemGroup>
@@ -23,7 +23,7 @@
   <ItemGroup>
     <PackageReference Include="OpilioCraft" Version="1.0.0" />
     <PackageReference Include="OpilioCraft.FSharp.Json" Version="8.0.0" />
-    <PackageReference Include="OpilioCraft.FSharp.Prelude" Version="8.0.0" />
+    <PackageReference Include="OpilioCraft.FSharp.Prelude" Version="8.1.0" />
   </ItemGroup>
 
 </Project>

@@ -21,22 +21,22 @@ type DigitalArchiveInitTests () =
     [<Fact>]
     member _. ``Exception on folder with corrupt settings file`` () =
         let testFunc () = Vault.Attach "C:/opt/Testing/xUnit/OpilioCraft.Vault/CorruptSettingsFile" |> ignore
-        Assert.Throws<InvalidUserSettingsException>(testFunc)
+        Assert.Throws<UserSettingsException>(testFunc)
 
     [<Fact>]
     member _. ``Exception on digital archive with invalid settings file and wrong version`` () =
         let testFunc () = Vault.Attach "C:/opt/Testing/xUnit/OpilioCraft.Vault/InvalidAndWrongVersion" |> ignore
-        Assert.Throws<InvalidUserSettingsException>(testFunc)
+        Assert.Throws<UserSettingsException>(testFunc)
 
     [<Fact>]
     member _. ``Exception on digital archive with valid settings file and wrong version`` () =
         let testFunc () = Vault.Attach "C:/opt/Testing/xUnit/OpilioCraft.Vault/ValidButWrongVersion" |> ignore
-        Assert.Throws<IncompatibleVersionException>(testFunc)
+        Assert.Throws<UserSettingsException>(testFunc)
 
     [<Fact>]
     member _. ``Exception on digital archive with invalid settings file but correct version`` () =
         let testFunc () = Vault.Attach "C:/opt/Testing/xUnit/OpilioCraft.Vault/InvalidButCorrectVersion" |> ignore
-        Assert.Throws<InvalidUserSettingsException>(testFunc)
+        Assert.Throws<UserSettingsException>(testFunc)
 
     [<Fact>]
     member _. ``Silence on digital archive with correct settings file and correct version`` () =

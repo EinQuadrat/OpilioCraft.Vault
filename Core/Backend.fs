@@ -7,18 +7,12 @@ open System.Text.Json.Serialization
 
 open OpilioCraft.FSharp.Prelude
 
-type VaultBackend (root : string, layout : VaultLayout) =
+type VaultBackend (layout : VaultLayout) =
     // content store filesystem layout
-    let (>+>) path childPath = Path.Combine(path, childPath)
+    let constructMetadataPath (id : ItemId) = Path.Combine(layout.Metadata, $"{id}.json")
+    let constructFilePath itemId ext = Path.Combine(layout.Files, $"{itemId}{ext}")
 
-    let resolvePath (path : string) = if Path.IsPathRooted(path) then path else root >+> path
-
-    let metadataSection = resolvePath layout.Metadata
-    let constructMetadataPath (id : ItemId) = metadataSection >+> $"{id}.json"
-    
-    let filesSection = resolvePath layout.Files
-    let constructFilePath itemId ext = filesSection >+> $"{itemId}{ext}"
-    
+    // item id guessing
     let itemIdFromFilename (filename : string) = filename.Substring(0, filename.Length - ".json".Length)
 
     // serialization settings
@@ -58,7 +52,7 @@ type VaultBackend (root : string, layout : VaultLayout) =
             // be relaxed on non-existing itemId
             let pathToMedatataFile = itemId |> constructMetadataPath in
             if File.Exists pathToMedatataFile then File.Delete pathToMedatataFile
-            Directory.GetFiles(filesSection, $"{itemId}.*") |> Array.iter File.Delete
+            Directory.GetFiles(layout.Files, $"{itemId}.*") |> Array.iter File.Delete
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot cleanup resources related to id {itemId}: {exn.Message}"
 
@@ -76,7 +70,7 @@ type VaultBackend (root : string, layout : VaultLayout) =
     member _.ExportFile itemId targetPath overwrite =
         try
             // in order to optimize metadata access, we lookup the file by id only
-            match Directory.GetFiles(filesSection, $"{itemId}.*") with
+            match Directory.GetFiles(layout.Files, $"{itemId}.*") with
             | [| file |] -> File.Copy(file, targetPath, overwrite)
             | [| |] -> failwith "no file found"
             | _ -> failwith "found more than one file, vault is possibly damaged"
@@ -85,7 +79,7 @@ type VaultBackend (root : string, layout : VaultLayout) =
             | exn -> failwith $"[{nameof VaultBackend}] cannot export file for id {id}: {exn.Message}"
 
     member _.List() =
-        metadataSection
+        layout.Metadata
         |> Directory.EnumerateFiles
         |> Seq.map (fun filename -> filename |> FileInfo |> _.Name |> itemIdFromFilename)
         |> Seq.toList

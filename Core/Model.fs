@@ -7,16 +7,6 @@ open OpilioCraft.FSharp.Prelude
 
 // ----------------------------------------------------------------------------
 
-type VaultRegistry = Map<string,string>
-
-exception UnknownVaultException of Name : string
-    with override x.Message = $"[OpilioCraft.Vault] no vault of name \"{x.Name}\" registered"
-
-exception MissingVaultSettingsFileException of Path:string
-    with override x.Message = $"[OpilioCraft.Vault] expected vault settings file at {x.Path}"
-
-// ----------------------------------------------------------------------------
-
 type VaultConfig =
     {
         Version : Version
@@ -29,6 +19,19 @@ and VaultLayout =
         Files : string
     }
 
+// errors
+type VaultError =
+    | UnknownVault of Name:string
+    | VaultNotFound of Path:string
+    | MissingVaultSettingsFile of Path:string
+    | InvalidVaultSettingsFile of OpilioCraft.FSharp.Json.UserSettings.ErrorReason
+    | IncompatibleVaultVersion of Type:Type * Expected:Version * Found:Version
+    | IncompatibleVaultLayout
+    | RuntimeError of exn
+
+// corresponding exceptions
+exception VaultException of VaultError
+    
 // ----------------------------------------------------------------------------
 
 type ItemId = Fingerprint

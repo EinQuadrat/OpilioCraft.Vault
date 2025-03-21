@@ -1,5 +1,7 @@
 ﻿namespace OpilioCraft.Vault
 
+open OpilioCraft.FSharp.Prelude
+
 [<RequireQualifiedAccess>]
 module VaultManager =
     // defaults
@@ -11,10 +13,11 @@ module VaultManager =
     // vault connection handling
     let private initVault name : Vault =
         try
-            UserSettings.vaultRegistry ()
+            VaultRegistry.vaultRegistry ()
             |> Map.tryFind name
-            |> Option.map Vault.Attach
-            |> Option.defaultWith (fun _ -> raise <| UnknownVaultException name)
+            |> Result.ofOption (UnknownVault name)
+            |> Result.bind Vault.Attach
+            |> Result.defaultWith (raise << VaultException)
         with
             | exn -> failwith $"[VaultManager] cannot attach to vault: {exn.Message}"
 

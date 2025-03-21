@@ -2,8 +2,8 @@
 
 open System.Collections.Generic
 
-type CachingVaultBackend (root : string, layout : VaultLayout) =
-    inherit VaultBackend (root, layout)
+type CachingVaultBackend (layout : VaultLayout) =
+    inherit VaultBackend (layout)
 
     let cache = new Dictionary<ItemId,VaultItem>()
 
