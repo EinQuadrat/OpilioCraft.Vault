@@ -9,14 +9,14 @@ open OpilioCraft.Vault
 // digital archive structure at filesystem
 type DigitalArchiveInitTests () =
     [<Fact>]
-    member _. ``Exception on non-existing archive path`` () =
-        let testFunc () = Vault.Attach "X:/DOES_NOT_EXIST" |> ignore
-        Assert.Throws<DirectoryNotFoundException>(testFunc)
+    let ``Exception on non-existing archive path`` () =
+        let testFunc () = Vault.Attach "X:/DOES_NOT_EXIST"
+        Assert.True(testFunc() = Error(VaultNotFound("X:/DOES_NOT_EXIST")))
 
     [<Fact>]
     member _. ``Exception on folder without settings file`` () =
         let testFunc () = Vault.Attach "C:/opt/Testing/xUnit/OpilioCraft.Vault/PlainFolder" |> ignore
-        Assert.Throws<MissingVaultSettingsFileException>(testFunc)
+        Assert.Throws<VaultException>(testFunc)
 
     [<Fact>]
     member _. ``Exception on folder with corrupt settings file`` () =
