@@ -26,4 +26,8 @@
     <PackageReference Include="OpilioCraft.FSharp.Prelude" Version="8.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="9.0.202" />
+  </ItemGroup>
+
 </Project>
