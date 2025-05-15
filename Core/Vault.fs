@@ -28,9 +28,6 @@ type private VaultCommand =
     
 [<Sealed>]
 type Vault private (backend : VaultBackend) =
-    static let ImplementationVersion = Version(1, 0)
-    static let SettingsFilename = "settings.json"
-
     // supported events
     let errorEvent = Event<_>()
     
@@ -82,12 +79,12 @@ type Vault private (backend : VaultBackend) =
         |> Result.testWith Directory.Exists VaultNotFound
 
         // check settings file
-        |> Result.map (fun p -> Path.Combine(p, SettingsFilename))
+        |> Result.map (fun p -> Path.Combine(p, Defaults.ConfigFilename))
         |> Result.testWith File.Exists MissingVaultSettingsFile
 
         // check settings
         |> Result.bind (load<VaultConfig> >> (Result.mapError InvalidVaultSettingsFile))
-        |> Result.bind (Version.isValidVersion ImplementationVersion >> (Result.mapError InvalidVaultSettingsFile))
+        |> Result.bind (Version.isValidVersion Defaults.ImplementationVersion >> (Result.mapError InvalidVaultSettingsFile))
 
         // check vault layout
         |> Result.bind (fun settings ->

@@ -37,7 +37,7 @@ type public VaultItemCommand () =
     // params
     [<Parameter>]
     [<ValidateNotNullOrEmpty>]
-    member val Vault = VaultManager.DefaultVault with get,set
+    member val Vault = Defaults.DefaultVault with get,set
 
     // functionality
     override x.BeginProcessing () =

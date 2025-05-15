@@ -21,7 +21,6 @@ and VaultLayout =
 
 // errors
 type VaultError =
-    | UnknownVault of Name:string
     | VaultNotFound of Path:string
     | MissingVaultSettingsFile of Path:string
     | InvalidVaultSettingsFile of OpilioCraft.FSharp.Json.UserSettings.ErrorReason

@@ -11,11 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Defaults.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="Backend.fs" />
     <Compile Include="CachingBackend.fs" />
     <Compile Include="Vault.fs" />
-    <Compile Include="VaultRegistry.fs" />
     <Compile Include="VaultManager.fs" />
     <Compile Include="VaultOperations.fs" />
   </ItemGroup>
