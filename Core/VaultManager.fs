@@ -11,6 +11,8 @@ type VaultManagerError =
     | MissingVaultRegistryError
     | InvalidVaultRegistryError of UserSettings.ErrorReason
     | UnknownVaultError of string
+    | VaultAlreadyExistsError of string
+    | DirectoryNotEmptyError of string
     | VaultError of VaultError
 
 // corresponding exceptions
@@ -49,8 +51,7 @@ module VaultManager =
             tryLoadVaultRegistry ()
             |> Result.defaultWith (raise << VaultManagerException)
 
-        let containsVault name r =
-            r |> Map.exists (fun k _ -> k = name)
+        let containsVault name (r: VaultRegistry) = r.ContainsKey(name)
 
         // modify registry
         module Modify =
@@ -63,8 +64,8 @@ module VaultManager =
             let unregisterVault name =
                 modifyIf (containsVault name) (Map.remove name)
 
-            let renameVault oldName newName r =
-                if (containsVault oldName r) && not (containsVault newName r)
+            let renameVault oldName newName (r: VaultRegistry) =
+                if (r.ContainsKey(oldName) && not (r.ContainsKey(newName)))
                 then
                     modify (fun r -> r |> Map.add newName r[oldName] |> Map.remove oldName) r
 
@@ -86,10 +87,11 @@ module VaultManager =
 
     let detachVault name = // no error on unknown vault
         Map.tryFind name vaults
-        |> Option.iter (fun v ->
-            (v :> System.IDisposable).Dispose()
-            vaults <- vaults |> Map.remove name
-        )
+        |> Option.iter
+            (fun v ->
+                (v :> System.IDisposable).Dispose()
+                vaults <- vaults |> Map.remove name
+            )
 
     let getVault name =
         // cache handling
@@ -120,3 +122,42 @@ module VaultManager =
 
         VaultRegistry.loadVaultRegistry ()
         |> VaultRegistry.Modify.renameVault oldName newName
+
+    // vault initialization, using default layout
+    let initVault name path =
+        try
+            Ok (name, path)
+            |> Result.test
+                (fun (n, _) -> not <| isRegistered n)
+                (VaultAlreadyExistsError name)
+            |> Result.test
+                (fun (_, p) ->
+                    if not <| IO.Directory.Exists(p)
+                    then
+                        IO.Directory.CreateDirectory(p) |> ignore
+                        true
+                    else
+                        IO.Directory.EnumerateFileSystemEntries(p)
+                        |> Seq.isEmpty
+                )
+                (DirectoryNotEmptyError path)
+            |> Result.teeOk
+                (fun (n, p) ->
+                    // create vault
+                    let layout = VaultLayout.Default in
+                    IO.Directory.CreateDirectory(IO.Path.Combine(p, layout.Metadata)) |> ignore
+                    IO.Directory.CreateDirectory(IO.Path.Combine(p, layout.Files)) |> ignore
+
+                    // create vault config
+                    let config = { Version = Defaults.ImplementationVersion; Layout = layout } in
+                    UserSettings.saveWithOptions<VaultConfig>
+                        (IO.Path.Combine(p, Defaults.ConfigFilename)) Defaults.DefaultJsonOptions config
+
+                    // register vault
+                    registerVault n p
+                )
+            |> Result.map (fun (n, _) -> getVault n)
+            |> Result.defaultWith (raise << VaultManagerException)
+
+        with
+            | exn -> failwith $"[VaultManager] cannot initialize vault: {exn.Message}"

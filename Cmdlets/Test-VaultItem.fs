@@ -6,11 +6,11 @@ open OpilioCraft.FSharp.Prelude
 
 [<Cmdlet(VerbsDiagnostic.Test, "VaultItem")>]
 [<OutputType(typeof<bool>)>]
-type public TestVaultItemCommand () =
-    inherit VaultItemCommand ()
+type public TestVaultItemCommand() =
+    inherit VaultItemCommand()
 
     // cmdlet funtionality
-    override x.ProcessPath path =
+    override x.ProcessPath(path) =
         path
         |> Fingerprint.fingerprintAsString
         |> x.ActiveVault.Contains

@@ -9,13 +9,14 @@ open OpilioCraft.FSharp.Prelude
 
 [<RequireQualifiedAccess>]
 module Defaults =
-    let ImplementationVersion = Version(1, 0)
-    let ConfigFilename = "settings.json"
+    let ImplementationVersion = Version(2, 0)
+    let ConfigFilename = "vault.json"
     let DefaultVault = "DEFAULT"
 
-    let VaultRegistryFilename = {|
-        User = ".vaultcfg"
-        Global = "vault-registry.json"
+    let VaultRegistryFilename =
+        {|
+            User = ".vaults"
+            Global = "vault-registry.json"
         |}
 
     let DefaultJsonOptions =

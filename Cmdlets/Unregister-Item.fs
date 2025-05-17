@@ -5,8 +5,8 @@ open System.Management.Automation
 
 [<Cmdlet(VerbsLifecycle.Unregister, "Item", DefaultParameterSetName="ItemId")>]
 [<OutputType(typeof<Void>)>]
-type public UnregisterItemCommand () =
-    inherit VaultItemCommand ()
+type public UnregisterItemCommand() =
+    inherit VaultItemCommand()
 
     // params
     [<Parameter(Position=0, Mandatory=true, ValueFromPipeline=true, ParameterSetName="ItemId")>]
@@ -16,7 +16,7 @@ type public UnregisterItemCommand () =
     member val ReportUnknown = SwitchParameter(false) with get,set
 
     // cmdlet functionality
-    override x.ProcessNonPath () =
+    override x.ProcessNonPath() =
         x.ItemId
         |> Array.partition x.ActiveVault.Contains
         |> fun (knownItems, unknownItems) ->

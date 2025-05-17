@@ -19,13 +19,20 @@ and VaultLayout =
         Files : string
     }
 
+    with
+        static member Default =
+            {
+                Metadata = "metadata"
+                Files = "files"
+            }
+
 // errors
 type VaultError =
-    | VaultNotFound of Path:string
-    | MissingVaultSettingsFile of Path:string
-    | InvalidVaultSettingsFile of OpilioCraft.FSharp.Json.UserSettings.ErrorReason
-    | IncompatibleVaultVersion of Type:Type * Expected:Version * Found:Version
-    | IncompatibleVaultLayout
+    | VaultNotFoundError of Path:string
+    | MissingVaultConfigError of Path:string
+    | InvalidVaultConfigError of OpilioCraft.FSharp.Json.UserSettings.ErrorReason
+    | IncompatibleVaultVersionError of Type:Type * Expected:Version * Found:Version
+    | IncompatibleVaultLayoutError
     | RuntimeError of exn
 
 // corresponding exceptions

@@ -6,7 +6,7 @@ open System.Management.Automation
 open OpilioCraft.Vault
 
 module private RelationHelper =
-    let tryParseRelationType (input : string) : RelationType option =
+    let tryParseRelationType (input: string) : RelationType option =
         match System.Enum.TryParse<RelationType>(input, true) with
         | true, value -> Some value
         | _ -> None
@@ -20,11 +20,11 @@ module private RelationHelper =
 
 [<Cmdlet(VerbsCommon.Get, "Relation")>]
 [<OutputType(typeof<Relation list>)>]
-type public GetRelationCommand () =
-    inherit VaultItemCommand ()
+type public GetRelationCommand() =
+    inherit VaultItemCommand()
 
     // cmdlet behaviour
-    override x.ProcessPath path =
+    override x.ProcessPath(path) =
         x.GetIdOfManagedItem path // throws exception on unmanaged item
         |> x.ActiveVault.Fetch
         |> fun metadata -> metadata.Relations
@@ -39,8 +39,8 @@ type private RelationContext =
         RelationType : RelationTypeParam
     }
 
-    static member Init(x : VaultItemCommand, target : string, relType : string) =
-        let targetId = x.GetIdOfManagedItem <| x.GetUnresolvedProviderPathFromPSPath target
+    static member Init(x: VaultItemCommand, target: string, relType: string) =
+        let targetId = x.GetIdOfManagedItem <| x.GetUnresolvedProviderPathFromPSPath(target)
 
         let relTypeValue : RelationTypeParam =
             match relType with
@@ -59,8 +59,8 @@ and RelationTypeParam =
 
 [<Cmdlet(VerbsCommon.Set, "Relation")>]
 [<OutputType(typeof<Void>)>]
-type public SetRelationCommand () =
-    inherit VaultItemCommand ()
+type public SetRelationCommand() =
+    inherit VaultItemCommand()
 
     // processed params
     let mutable context = RelationContext.Default
@@ -79,8 +79,8 @@ type public SetRelationCommand () =
         base.BeginProcessing()
         context <- RelationContext.Init(x, x.Target, x.RelationType)
     
-    override x.ProcessPath path =
-        let itemId = x.GetIdOfManagedItem path
+    override x.ProcessPath(path) =
+        let itemId = x.GetIdOfManagedItem(path)
         let relType = match context.RelationType with | Value relType -> relType | _ -> RelationType.Related
 
         x.ActiveVault |> VaultOperations.updateVaultItem
@@ -91,8 +91,8 @@ type public SetRelationCommand () =
 
 [<Cmdlet(VerbsCommon.Remove, "Relation")>]
 [<OutputType(typeof<Void>)>]
-type public RemoveRelationCommand () =
-    inherit VaultItemCommand ()
+type public RemoveRelationCommand() =
+    inherit VaultItemCommand()
 
     // processed params
     let mutable context = RelationContext.Default
@@ -120,8 +120,8 @@ type public RemoveRelationCommand () =
         then
             context <- RelationContext.Init(x, x.Target, x.RelationType)
 
-    override x.ProcessPath path =
-        let itemId = x.GetIdOfManagedItem path
+    override x.ProcessPath(path) =
+        let itemId = x.GetIdOfManagedItem(path)
 
         if x.All.IsPresent
         then

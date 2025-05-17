@@ -13,8 +13,8 @@ type private VaultStatus =
     | Initialized of Vault
 
 [<AbstractClass>]
-type public VaultItemCommand () =
-    inherit PathSupportingCommand ()
+type public VaultItemCommand() =
+    inherit PathSupportingCommand()
 
     // vault
     let mutable vault = NotInitialized
@@ -25,7 +25,7 @@ type public VaultItemCommand () =
         | Initialized vault -> vault
 
     // vault item
-    member x.GetIdOfManagedItem path =
+    member x.GetIdOfManagedItem(path) =
         let itemId = Fingerprint.fingerprintAsString path
 
         if not <| x.ActiveVault.Contains(itemId)
@@ -40,8 +40,8 @@ type public VaultItemCommand () =
     member val Vault = Defaults.DefaultVault with get,set
 
     // functionality
-    override x.BeginProcessing () =
-        base.BeginProcessing ()
+    override x.BeginProcessing() =
+        base.BeginProcessing()
 
         try
             vault <- Initialized <| VaultManager.getVault x.Vault
@@ -49,5 +49,5 @@ type public VaultItemCommand () =
             | exn -> exn |> x.ThrowAsTerminatingError ErrorCategory.ResourceUnavailable 
 
     // default implementations
-    override _.ProcessPath _ = raise <| InvalidOperationException()
-    override _.ProcessNonPath () = raise <| InvalidOperationException()
+    override _.ProcessPath(_) = raise <| InvalidOperationException()
+    override _.ProcessNonPath() = raise <| InvalidOperationException()

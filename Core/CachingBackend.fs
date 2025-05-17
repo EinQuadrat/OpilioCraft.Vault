@@ -2,10 +2,10 @@
 
 open System.Collections.Generic
 
-type CachingVaultBackend (layout : VaultLayout) =
-    inherit VaultBackend (layout)
+type CachingVaultBackend(layout) =
+    inherit VaultBackend(layout)
 
-    let cache = new Dictionary<ItemId,VaultItem>()
+    let cache = new Dictionary<ItemId, VaultItem>()
 
     // public API
     override _.ContainsItem itemId = cache.ContainsKey itemId || base.ContainsItem itemId

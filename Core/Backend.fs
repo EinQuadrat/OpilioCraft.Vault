@@ -7,21 +7,23 @@ open System.Text.Json.Serialization
 
 open OpilioCraft.FSharp.Prelude
 
-type VaultBackend (layout : VaultLayout) =
+type VaultBackend (layout: VaultLayout) =
     // content store filesystem layout
-    let constructMetadataPath (id : ItemId) = Path.Combine(layout.Metadata, $"{id}.json")
+    let constructMetadataPath (id: ItemId) = Path.Combine(layout.Metadata, $"{id}.json")
     let constructFilePath itemId ext = Path.Combine(layout.Files, $"{itemId}{ext}")
 
     // item id guessing
-    let itemIdFromFilename (filename : string) = filename.Substring(0, filename.Length - ".json".Length)
+    let itemIdFromFilename (filename: string) = filename.Substring(0, filename.Length - ".json".Length)
 
     // serialization settings
     let jsonOptions =
-        JsonSerializerOptions() |> fun jsonOpts ->
-            jsonOpts.WriteIndented <- true
-            jsonOpts.Converters.Add(JsonStringEnumConverter(JsonNamingPolicy.CamelCase))
-            jsonOpts.Converters.Add(RelationListConverter())
-            jsonOpts
+        JsonSerializerOptions()
+        |> tee
+            (fun jsonOpts ->
+                jsonOpts.WriteIndented <- true
+                jsonOpts.Converters.Add(JsonStringEnumConverter(JsonNamingPolicy.CamelCase))
+                jsonOpts.Converters.Add(RelationListConverter())
+            )
     
     // item access API
     abstract member ContainsItem : ItemId -> bool
