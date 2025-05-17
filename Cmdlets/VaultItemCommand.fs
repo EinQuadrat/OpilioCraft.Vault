@@ -46,7 +46,7 @@ type public VaultItemCommand() =
         try
             vault <- Initialized <| VaultManager.getVault x.Vault
         with
-            | exn -> exn |> x.ThrowAsTerminatingError ErrorCategory.ResourceUnavailable 
+            | exn -> x.ThrowAsTerminatingError(ErrorCategory.ResourceUnavailable, exn)
 
     // default implementations
     override _.ProcessPath(_) = raise <| InvalidOperationException()

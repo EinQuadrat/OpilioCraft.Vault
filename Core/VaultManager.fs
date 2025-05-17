@@ -9,7 +9,7 @@ open OpilioCraft.FSharp.Json
 
 type VaultManagerError =
     | MissingVaultRegistryError
-    | InvalidVaultRegistryError of UserSettings.ErrorReason
+    | InvalidVaultRegistryError of UserSettings.UserSettingsError
     | UnknownVaultError of string
     | VaultAlreadyExistsError of string
     | DirectoryNotEmptyError of string

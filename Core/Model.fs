@@ -30,7 +30,7 @@ and VaultLayout =
 type VaultError =
     | VaultNotFoundError of Path:string
     | MissingVaultConfigError of Path:string
-    | InvalidVaultConfigError of OpilioCraft.FSharp.Json.UserSettings.ErrorReason
+    | InvalidVaultConfigError of OpilioCraft.FSharp.Json.UserSettings.UserSettingsError
     | IncompatibleVaultVersionError of Type:Type * Expected:Version * Found:Version
     | IncompatibleVaultLayoutError
     | RuntimeError of exn
