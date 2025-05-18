@@ -3,7 +3,7 @@
 open System
 open System.Text.Json
 
-open OpilioCraft.FSharp
+open OpilioCraft.FSharp.Prelude
 
 // ----------------------------------------------------------------------------
 

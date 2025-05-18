@@ -1,13 +1,14 @@
 ﻿module OpilioCraft.Vault.VaultOperations
 
 open System.IO
-open OpilioCraft.FSharp
+
+open OpilioCraft.FSharp.Fingerprint
 
 // common operations
 let addToVault path (vault: Vault) =
     try
         let fileInfo = FileInfo path
-        let fingerprint = fileInfo.FullName |> Fingerprint.fingerprintAsString
+        let fingerprint = fileInfo.FullName |> fingerprintAsString
 
         if not <| vault.Contains(fingerprint)
         then

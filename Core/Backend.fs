@@ -5,7 +5,7 @@ open System.IO
 open System.Text.Json
 open System.Text.Json.Serialization
 
-open OpilioCraft.FSharp
+open OpilioCraft.FSharp.Prelude
 open OpilioCraft.FSharp.IO
 
 type VaultBackend (layout: VaultLayout) =
