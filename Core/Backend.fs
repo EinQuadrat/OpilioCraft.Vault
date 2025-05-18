@@ -5,11 +5,12 @@ open System.IO
 open System.Text.Json
 open System.Text.Json.Serialization
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
+open OpilioCraft.FSharp.IO
 
 type VaultBackend (layout: VaultLayout) =
     // content store filesystem layout
-    let constructMetadataPath (id: ItemId) = Path.Combine(layout.Metadata, $"{id}.json")
+    let constructMetadataPath itemId = Path.Combine(layout.Metadata, $"{itemId}.json")
     let constructFilePath itemId ext = Path.Combine(layout.Files, $"{itemId}{ext}")
 
     // item id guessing
@@ -26,30 +27,30 @@ type VaultBackend (layout: VaultLayout) =
             )
     
     // item access API
-    abstract member ContainsItem : ItemId -> bool
-    abstract member FetchItem : ItemId -> VaultItem
+    abstract member ContainsItem : string -> bool
+    abstract member FetchItem : string -> VaultItem
     abstract member StoreItem : VaultItem -> unit
-    abstract member ForgetItem : ItemId -> unit
+    abstract member ForgetItem : string -> unit
 
     // item access implementation
-    default _.ContainsItem itemId =
+    default _.ContainsItem(itemId) =
         itemId |> constructMetadataPath |> File.Exists
 
-    default _.FetchItem itemId =
+    default _.FetchItem(itemId) =
         try
             let json = itemId |> constructMetadataPath |> File.ReadAllText in
             JsonSerializer.Deserialize<VaultItem>(json, jsonOptions)
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot read metadata for id {itemId}: {exn.Message}"
 
-    default _.StoreItem item =
+    default _.StoreItem(item) =
         try
-            IO.saveGuard (item.Id |> constructMetadataPath)
+            saveGuard (item.Id |> constructMetadataPath)
             <| fun uri -> let itemAsJson = JsonSerializer.Serialize(item, jsonOptions) in File.WriteAllText(uri, itemAsJson)
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot write metadata for id {item.Id}: {exn.Message}"
 
-    default _.ForgetItem itemId =
+    default _.ForgetItem(itemId) =
         try
             // be relaxed on non-existing itemId
             let pathToMedatataFile = itemId |> constructMetadataPath in
@@ -59,7 +60,7 @@ type VaultBackend (layout: VaultLayout) =
             | exn -> failwith $"[{nameof VaultBackend}] cannot cleanup resources related to id {itemId}: {exn.Message}"
 
     // content API
-    member _.ImportFile itemId sourcePath =
+    member _.ImportFile(itemId, sourcePath) =
         let fileInfo = FileInfo(sourcePath)
         let dataFile = (itemId, fileInfo.Extension.ToLower()) ||> constructFilePath
 
@@ -69,11 +70,11 @@ type VaultBackend (layout: VaultLayout) =
         with
             | exn -> failwith $"[{nameof VaultBackend}] cannot import file for id {id}: {exn.Message}"
 
-    member _.ExportFile itemId targetPath overwrite =
+    member _.ExportFile(itemId, targetPath, ?overwrite) =
         try
             // in order to optimize metadata access, we lookup the file by id only
             match Directory.GetFiles(layout.Files, $"{itemId}.*") with
-            | [| file |] -> File.Copy(file, targetPath, overwrite)
+            | [| file |] -> File.Copy(file, targetPath, overwrite |> Option.defaultValue false)
             | [| |] -> failwith "no file found"
             | _ -> failwith "found more than one file, vault is possibly damaged"
                         

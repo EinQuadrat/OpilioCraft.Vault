@@ -22,8 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="OpilioCraft" Version="1.0.0" />
-    <PackageReference Include="OpilioCraft.FSharp.Json" Version="9.0.0" />
-    <PackageReference Include="OpilioCraft.FSharp.Prelude" Version="9.0.0" />
+    <PackageReference Include="OpilioCraft.FSharp" Version="10.0.0" />
+    <PackageReference Include="OpilioCraft.FSharp.Json" Version="9.0.2" />
   </ItemGroup>
 
   <ItemGroup>

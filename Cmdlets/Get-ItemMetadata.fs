@@ -2,7 +2,7 @@
 
 open System.Management.Automation
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
 open OpilioCraft.Vault
 
 [<Cmdlet(VerbsCommon.Get, "ItemMetadata")>]

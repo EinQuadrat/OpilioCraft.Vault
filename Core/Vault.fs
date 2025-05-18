@@ -3,23 +3,23 @@
 open System
 open System.IO
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
 open OpilioCraft.FSharp.Json.UserSettings
 
 // ----------------------------------------------------------------------------
 // features supported by Vault
 
 type private VaultCommand =
-    | Contains      of ItemId:ItemId * AsyncReplyChannel<bool>
+    | Contains      of ItemId: string * AsyncReplyChannel<bool>
 
-    | Fetch         of ItemId:ItemId * AsyncReplyChannel<VaultItem>
-    | Store         of Item:VaultItem
-    | Forget        of ItemId:ItemId // any request for non-existing item is gracefully ignored
+    | Fetch         of ItemId: string * AsyncReplyChannel<VaultItem>
+    | Store         of Item: VaultItem
+    | Forget        of ItemId: string // any request for non-existing item is gracefully ignored
 
-    | ImportFile    of ItemId:ItemId * SourcePath:string
-    | ExportFile    of ItemId:ItemId * TargetPath:string * Overwrite:bool
+    | ImportFile    of ItemId: string * SourcePath: string
+    | ExportFile    of ItemId: string * TargetPath: string * Overwrite: bool
 
-    | List of AsyncReplyChannel<ItemId list>
+    | List of AsyncReplyChannel<string list>
 
     | Quit
 
@@ -43,8 +43,8 @@ type Vault private (backend: VaultBackend) =
                     | Fetch(itemId, replyChannel) -> itemId |> backend.FetchItem |> replyChannel.Reply
                     | Store(item) -> item |> backend.StoreItem
                     | Forget(itemId) -> itemId |> backend.ForgetItem
-                    | ImportFile(itemId, sourcePath) -> backend.ImportFile itemId sourcePath
-                    | ExportFile(itemId, targetPath, overwrite) -> backend.ExportFile itemId targetPath overwrite
+                    | ImportFile(itemId, sourcePath) -> backend.ImportFile(itemId, sourcePath)
+                    | ExportFile(itemId, targetPath, overwrite) -> backend.ExportFile(itemId, targetPath, overwrite)
                     | List(replyChannel) -> backend.List() |> replyChannel.Reply
 
                     | Quit -> return ()
@@ -72,7 +72,12 @@ type Vault private (backend: VaultBackend) =
 
     // instance creation
     static member Attach(pathToVault, ?enableCaching) =
-        let resolvePath root (path: string) = if Path.IsPathRooted(path) then path else Path.Combine(root, path)
+        let resolvePath root (path: string) =
+            if Path.IsPathRooted(path)
+            then
+                path 
+            else
+                Path.Combine(root, path)
 
         // check vault path
         Ok pathToVault
@@ -113,12 +118,12 @@ type Vault private (backend: VaultBackend) =
     // implements IDisposable
     member private _.Disposer = lazy (vaultAgent.Value.Post(Quit))
 
-    member x.DisposeHandler disposing =
+    member x.DisposeHandler(disposing) =
         if disposing && (not x.Disposer.IsValueCreated)
         then
-            x.Disposer.Force ()
+            x.Disposer.Force()
 
     interface IDisposable with
         member x.Dispose() =
-            x.DisposeHandler true
-            GC.SuppressFinalize x
+            x.DisposeHandler(true)
+            GC.SuppressFinalize(x)

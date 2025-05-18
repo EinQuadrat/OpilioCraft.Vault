@@ -1,6 +1,6 @@
 ﻿namespace OpilioCraft.Vault.Cmdlets
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
 
 [<RequireQualifiedAccess>]
 module Assert =

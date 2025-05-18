@@ -1,7 +1,7 @@
 ﻿module OpilioCraft.Vault.VaultOperations
 
 open System.IO
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
 
 // common operations
 let addToVault path (vault: Vault) =

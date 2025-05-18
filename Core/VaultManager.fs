@@ -2,7 +2,7 @@
 
 open System
 
-open OpilioCraft.FSharp.Prelude
+open OpilioCraft.FSharp
 open OpilioCraft.FSharp.Json
 
 // ----------------------------------------------------------------------------
@@ -151,7 +151,9 @@ module VaultManager =
                     // create vault config
                     let config = { Version = Defaults.ImplementationVersion; Layout = layout } in
                     UserSettings.saveWithOptions<VaultConfig>
-                        (IO.Path.Combine(p, Defaults.ConfigFilename)) Defaults.DefaultJsonOptions config
+                        (IO.Path.Combine(p, Defaults.ConfigFilename))
+                        Defaults.DefaultJsonOptions
+                        config
 
                     // register vault
                     registerVault n p

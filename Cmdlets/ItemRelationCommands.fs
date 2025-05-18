@@ -35,7 +35,7 @@ type public GetRelationCommand() =
 
 type private RelationContext =
     {
-        Target : ItemId
+        Target : string
         RelationType : RelationTypeParam
     }
 

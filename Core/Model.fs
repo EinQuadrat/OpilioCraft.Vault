@@ -3,8 +3,6 @@
 open System
 open System.Text.Json.Serialization
 
-open OpilioCraft.FSharp.Prelude
-
 // ----------------------------------------------------------------------------
 
 type VaultConfig =
@@ -40,11 +38,9 @@ exception VaultException of VaultError
     
 // ----------------------------------------------------------------------------
 
-type ItemId = Fingerprint
-
 type VaultItem = // data structure used by the vault
     {
-        Id : ItemId // use fingerprint (SHA256) as id
+        Id : string // use fingerprint (SHA256) as id
         AsOf : DateTime // as UTC timestamp
         Relations : Relation list
     }
@@ -53,7 +49,7 @@ type VaultItem = // data structure used by the vault
     member x.AsOfLocal = x.AsOf.ToLocalTime()
 
 and Relation = {
-    Target : ItemId
+    Target : string
     IsA : RelationType
 }
 
