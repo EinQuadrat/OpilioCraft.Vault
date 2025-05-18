@@ -107,6 +107,10 @@ module VaultManager =
         VaultRegistry.loadVaultRegistry ()
         |> VaultRegistry.containsVault name
 
+    let getRegisteredVaults () =
+        VaultRegistry.loadVaultRegistry ()
+        |> Map.keys
+
     let registerVault name path =
         VaultRegistry.loadVaultRegistry ()
         |> VaultRegistry.Modify.registerVault name path
