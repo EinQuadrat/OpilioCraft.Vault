@@ -13,6 +13,7 @@ type VaultManagerError =
     | UnknownVaultError of string
     | VaultAlreadyExistsError of string
     | DirectoryNotEmptyError of string
+    | CannotInitializeVaultError of exn
     | VaultError of VaultError
 
 // corresponding exceptions
@@ -29,8 +30,9 @@ module VaultManager =
     let mutable private vaults : Map<string, Vault> = Map.empty
 
     // vault registry
-    module private VaultRegistry =
-        let tryVaultRegistryPath () =
+    [<RequireQualifiedAccess>]
+    module VaultRegistry =
+        let tryGetRegistryPath () =
             [
                 // file in user home overrules global file
                 IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), Defaults.VaultRegistryFilename.User)
@@ -39,23 +41,23 @@ module VaultManager =
             |> List.tryFind IO.File.Exists
             |> Result.ofOption MissingVaultRegistryError
     
-        let vaultRegistryPath = 
-            tryVaultRegistryPath ()
+        let getRegistryPath = 
+            tryGetRegistryPath ()
             |> Result.defaultWith (raise << VaultManagerException)
 
-        let tryLoadVaultRegistry () =
-            tryVaultRegistryPath ()
+        let tryLoad () =
+            tryGetRegistryPath ()
             |> Result.bind (UserSettings.load<VaultRegistry> >> (Result.mapError InvalidVaultRegistryError))
 
-        let loadVaultRegistry () =
-            tryLoadVaultRegistry ()
+        let load () =
+            tryLoad ()
             |> Result.defaultWith (raise << VaultManagerException)
 
         let containsVault name (r: VaultRegistry) = r.ContainsKey(name)
 
         // modify registry
         module Modify =
-            let private modify f = f >> UserSettings.save<VaultRegistry> vaultRegistryPath
+            let private modify f = f >> UserSettings.save<VaultRegistry> getRegistryPath
             let private modifyIf p f r = if p r then modify f r
 
             let registerVault name path =
@@ -73,17 +75,15 @@ module VaultManager =
     // public API
 
     // vault connection handling
-    let attachVault name : Vault =
-        try
-            VaultRegistry.tryLoadVaultRegistry ()
-            |> Result.test (VaultRegistry.containsVault name) (UnknownVaultError name)
-            |> Result.map (fun r -> r[name])
-            |> Result.defaultWith (raise << VaultManagerException)
-            |> fun path -> Vault.Attach(path)
-            |> Result.defaultWith (raise << VaultManagerException << VaultError)
+    let tryAttachVault name =
+        VaultRegistry.tryLoad ()
+        |> Result.test (VaultRegistry.containsVault name) (UnknownVaultError name)
+        |> Result.map (fun r -> r[name])
+        |> Result.bind (fun path -> Vault.Attach(path) |> Result.mapError VaultError)
 
-        with
-            | exn -> failwith $"[VaultManager] cannot attach to vault: {exn.Message}"
+    let attachVault name =
+        tryAttachVault name
+        |> Result.defaultWith (raise << VaultManagerException)
 
     let detachVault name = // no error on unknown vault
         Map.tryFind name vaults
@@ -104,27 +104,27 @@ module VaultManager =
 
     // vault registry handling
     let isRegistered name =
-        VaultRegistry.loadVaultRegistry ()
+        VaultRegistry.load ()
         |> VaultRegistry.containsVault name
 
     let getRegisteredVaults () =
-        VaultRegistry.loadVaultRegistry ()
+        VaultRegistry.load ()
         |> Map.keys
 
     let registerVault name path =
-        VaultRegistry.loadVaultRegistry ()
+        VaultRegistry.load ()
         |> VaultRegistry.Modify.registerVault name path
 
     let unregisterVault name =
         detachVault name // detach vault first
 
-        VaultRegistry.loadVaultRegistry ()
+        VaultRegistry.load ()
         |> VaultRegistry.Modify.unregisterVault name
 
     let renameVault oldName newName =
         detachVault oldName // detach vault first
 
-        VaultRegistry.loadVaultRegistry ()
+        VaultRegistry.load ()
         |> VaultRegistry.Modify.renameVault oldName newName
 
     // vault initialization, using default layout
@@ -163,7 +163,6 @@ module VaultManager =
                     registerVault n p
                 )
             |> Result.map (fun (n, _) -> getVault n)
-            |> Result.defaultWith (raise << VaultManagerException)
 
         with
-            | exn -> failwith $"[VaultManager] cannot initialize vault: {exn.Message}"
+            | exn -> Error <| CannotInitializeVaultError exn
