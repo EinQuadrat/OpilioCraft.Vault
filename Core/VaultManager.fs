@@ -11,10 +11,13 @@ type VaultManagerError =
     | MissingVaultRegistryError
     | InvalidVaultRegistryError of UserSettings.UserSettingsError
     | UnknownVaultError of string
-    | VaultAlreadyExistsError of string
-    | DirectoryNotEmptyError of string
-    | CannotInitializeVaultError of exn
+    | CannotInitializeVaultError of InitializationErrorDetail
     | VaultError of VaultError
+
+and InitializationErrorDetail =
+    | NameAlreadyInUse of Name: string
+    | TargetDirectoryNotEmpty of Path: string
+    | ExceptionOccurred of exn
 
 // corresponding exceptions
 exception VaultManagerException of VaultManagerError
@@ -93,14 +96,17 @@ module VaultManager =
                 vaults <- vaults |> Map.remove name
             )
 
-    let getVault name =
-        // cache handling
+    let tryGetVault name =
         if not <| Map.containsKey name vaults
         then
-            vaults <- vaults |> Map.add name (attachVault name)
+            tryAttachVault name
+            |> Result.teeOk (fun v -> vaults <- vaults |> Map.add name v)
+        else
+            Ok vaults[name]
 
-        // return vault
-        vaults[name]
+    let getVault name =
+        tryGetVault name
+        |> Result.defaultWith (raise << VaultManagerException)
 
     // vault registry handling
     let isRegistered name =
@@ -133,7 +139,8 @@ module VaultManager =
             Ok (name, path)
             |> Result.test
                 (fun (n, _) -> not <| isRegistered n)
-                (VaultAlreadyExistsError name)
+                (CannotInitializeVaultError <| NameAlreadyInUse name)
+
             |> Result.test
                 (fun (_, p) ->
                     if not <| IO.Directory.Exists(p)
@@ -144,7 +151,8 @@ module VaultManager =
                         IO.Directory.EnumerateFileSystemEntries(p)
                         |> Seq.isEmpty
                 )
-                (DirectoryNotEmptyError path)
+                (CannotInitializeVaultError <| TargetDirectoryNotEmpty path)
+
             |> Result.teeOk
                 (fun (n, p) ->
                     // create vault
@@ -165,4 +173,4 @@ module VaultManager =
             |> Result.map (fun (n, _) -> getVault n)
 
         with
-            | exn -> Error <| CannotInitializeVaultError exn
+            | exn -> Error (CannotInitializeVaultError <| ExceptionOccurred exn)
