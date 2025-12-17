@@ -95,12 +95,13 @@ type Vault private (backend: VaultBackend) =
         |> Result.bind
             (fun settings ->
                 Ok settings.Layout
-                |> Result.bind (verify (tryGetProperty "Metadata" >> Option.isSome ) (fun _ -> MissingPropertyError("Metadata")))
+                |> Result.test (tryGetProperty "Items" >> Option.isSome) (MissingPropertyError("Items"))
+                |> Result.test (tryGetProperty "Metadata" >> Option.isSome) (MissingPropertyError("Metadata"))
                 |> Result.map (fun l -> { l with Metadata = resolvePath pathToVault (l.Metadata) })
-                |> Result.bind (verify (fun s -> Directory.Exists(s.Metadata)) (fun s -> MissingFolderError(s.Metadata)))
-                |> Result.bind (verify (tryGetProperty "Files" >> Option.isSome ) (fun _ -> MissingPropertyError("Files")))
+                |> Result.testWith (fun s -> Directory.Exists(s.Metadata)) (fun s -> MissingFolderError(s.Metadata))
+                |> Result.test (tryGetProperty "Files" >> Option.isSome ) (MissingPropertyError("Files"))
                 |> Result.map (fun l -> { l with Files = resolvePath pathToVault (l.Files) })
-                |> Result.bind (verify (fun s -> Directory.Exists(s.Files)) (fun s -> MissingFolderError(s.Files)))
+                |> Result.testWith (fun s -> Directory.Exists(s.Files)) (fun s -> MissingFolderError(s.Files))
                 |> Result.mapError InvalidVaultConfigError
             )
         
