@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 
     <Description>PowerShell cmdlets to work with OpilioCraft.Vault.</Description>
 
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="4.1.0" />
+    <PackageReference Include="OpilioCraft.FSharp.PowerShell" Version="5.0.1" />
   </ItemGroup>
 
   <ItemGroup>

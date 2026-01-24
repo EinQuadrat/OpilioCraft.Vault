@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 
     <Description>Implements a digital vault, supporting digital assets.</Description>
 
@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpilioCraft" Version="1.1.1" />
-    <PackageReference Include="OpilioCraft.FSharp" Version="10.5.0" />
-    <PackageReference Include="OpilioCraft.FSharp.Json" Version="9.1.0" />
+    <PackageReference Include="OpilioCraft" Version="1.1.2" />
+    <PackageReference Include="OpilioCraft.FSharp" Version="10.5.1" />
+    <PackageReference Include="OpilioCraft.FSharp.Json" Version="9.1.1" />
   </ItemGroup>
 
   <ItemGroup>
