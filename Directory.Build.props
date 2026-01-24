@@ -6,10 +6,10 @@
 
   <PropertyGroup>
 
-    <VersionPrefix>2.8.0</VersionPrefix>
+    <VersionPrefix>2.8.2</VersionPrefix>
 
     <Authors>Carsten Schäfer</Authors>
-    <Copyright>Copyright (c) 2022-2025 by Carsten Schäfer</Copyright>
+    <Copyright>Copyright (c) 2022-2026 by Carsten Schäfer</Copyright>
 
     <RepositoryUrl>https://github.com/EinQuadrat/OpilioCraft.Vault.git</RepositoryUrl>
     <PackageTags>OpilioCraft;Vault;FSharp</PackageTags>

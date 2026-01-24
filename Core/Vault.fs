@@ -95,7 +95,6 @@ type Vault private (backend: VaultBackend) =
         |> Result.bind
             (fun settings ->
                 Ok settings.Layout
-                |> Result.test (tryGetProperty "Items" >> Option.isSome) (MissingPropertyError("Items"))
                 |> Result.test (tryGetProperty "Metadata" >> Option.isSome) (MissingPropertyError("Metadata"))
                 |> Result.map (fun l -> { l with Metadata = resolvePath pathToVault (l.Metadata) })
                 |> Result.testWith (fun s -> Directory.Exists(s.Metadata)) (fun s -> MissingFolderError(s.Metadata))
